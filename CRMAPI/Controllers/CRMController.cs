@@ -16,7 +16,7 @@ namespace CRMAPI.Controllers
         }
 
         [HttpGet ("GetUser")]
-        public async Task<IActionResult> GetUser()
+        public async Task<IActionResult> GetUser(int pageNumber = 1, int pageSize = 10)
         {
             var users = await _authservice.GetLead();
 
@@ -25,15 +25,26 @@ namespace CRMAPI.Controllers
                 return NotFound(new
                 {
                     Message = "No Record Found"
-
                 });
             }
+
+            var totalRecords = users.Count();
+
+            var pagedData = users
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             return Ok(new
             {
-                count = users.Count(),
-                records = users
+                pageNumber,
+                pageSize,
+                totalRecords,
+                totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize),
+                records = pagedData
             });
         }
+
 
     }
 }
